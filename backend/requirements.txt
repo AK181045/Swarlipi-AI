@@ -1,0 +1,37 @@
+# SwarLipi AI Backend - Core Dependencies
+# Install with: pip install -r requirements.txt
+
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+websockets>=12.0
+
+# Database
+sqlalchemy[asyncio]>=2.0.30
+asyncpg>=0.29.0
+alembic>=1.13.0
+
+# Task Queue
+celery[redis]>=5.4.0
+redis>=5.0.0
+
+# Audio Processing
+pydub>=0.25.1
+yt-dlp>=2024.3.10
+
+# Auth
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Utilities
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.1
+httpx>=0.27.0
+aiofiles>=23.2.1
+numpy>=1.26.0
+
+# Note: Heavy AI/ML deps (torch, torchaudio, music21, librosa, etc.)
+# are installed separately when GPU/model setup is needed.
+# For dev, the backend runs with placeholder transcription.
