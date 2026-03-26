@@ -1,0 +1,96 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+Project Name: SwarLipi AI (Tentative)
+Project Platform: Google Antigravity (Agentic IDE)
+Document Version: 1.0.0
+Date: March 26, 2026
+
+---------------------------------------------------------
+1. PROJECT OVERVIEW
+---------------------------------------------------------
+The objective is to build a high-fidelity AI-powered music transcription 
+platform. The application will allow users to upload audio files or provide 
+URLs (YouTube/Web) and receive a full, multi-instrument sheet music 
+notation. The system must support both Western notation (Staff) and 
+Indian Classical notation (Sargam/Hindustani/Carnatic).
+
+---------------------------------------------------------
+2. TARGET AUDIENCE
+---------------------------------------------------------
+* Music Students & Educators (Traditional & Western)
+* Composers & Arrangers looking to reverse-engineer complex tracks.
+* Indian Classical musicians requiring Sargam transcriptions.
+* Content Creators needing MIDI/Sheet music from their own recordings.
+
+---------------------------------------------------------
+3. CORE FEATURES & FUNCTIONALITIES
+---------------------------------------------------------
+
+[F01] Multi-Source Input:
+- Support for .mp3, .wav, .flac, .mp4 files.
+- YouTube/Vimeo URL integration for automated audio extraction.
+
+[F02] AI Source Separation (Stemming):
+- Separation of tracks into: Vocals, Drums, Bass, Piano, Guitar, 
+  and "Other" (Strings, Woodwinds, Traditional Instruments).
+- Fine-tuned support for Indian instruments (Sitar, Tabla, Sarangi, Flute).
+
+[F03] Multi-Instrument Transcription:
+- Generation of polyphonic notation for each separated stem.
+- Precision tracking of "Meend" (slides) and "Gamakas" (ornamentation).
+
+[F04] Notation Viewing & Export:
+- Web-based sheet music renderer.
+- Support for Western Staff Notation and Indian Sargam.
+- Export formats: PDF (Sheet Music), MIDI, MusicXML, and Guitar Pro.
+
+[F05] Interactive Editor:
+- Ability to play back the notation with a synchronized cursor.
+- Manual editing tools to correct AI-generated notes.
+
+---------------------------------------------------------
+4. TECHNICAL SPECIFICATIONS (ANTIGRAVITY STACK)
+---------------------------------------------------------
+
+* Frontend: React 19 / Next.js (Tailwind CSS for UI).
+* Backend: Python (FastAPI) for heavy lifting AI tasks.
+* AI Models (Stems): Demucs v5 (Meta) / Hybrid Transformer-based models.
+* AI Models (Transcription): MT3 (Multi-Task Multitrack Music Transcription).
+* Database: PostgreSQL (for user data) + Redis (for processing queues).
+* Cloud Infrastructure: Google Cloud Vertex AI for model hosting.
+
+---------------------------------------------------------
+5. USER FLOW
+---------------------------------------------------------
+1. User lands on Dashboard -> "Start New Project."
+2. User provides YouTube URL or uploads an MP3 file.
+3. System triggers Background Agent (Antigravity Worker) to extract audio.
+4. AI separates stems -> AI transcribes each stem to MIDI/MusicXML.
+5. User views the "Multi-Track Studio" where notation for all 
+   instruments is synced.
+6. User clicks "Export" to get the full score.
+
+---------------------------------------------------------
+6. SPECIAL REQUIREMENTS: INDIAN CLASSICAL MUSIC
+---------------------------------------------------------
+- The system must recognize 22 Shrutis for precision.
+- Ability to toggle between Western "C Major" and Indian "Bilawal That" 
+  referencing for notations.
+- Specialized "Tabla Bol" transcription (Dha, Dhin, Na, etc.) for 
+  percussion tracks.
+
+---------------------------------------------------------
+7. ROADMAP & MILESTONES
+---------------------------------------------------------
+- Phase 1 (MVP): Single track MP3 to Western Staff Notation.
+- Phase 2: Multi-instrument separation and YouTube URL support.
+- Phase 3: Indian Classical Notation (Sargam) and Instrument-specific tuning.
+- Phase 4: Real-time collaborative editing using Antigravity agents.
+
+---------------------------------------------------------
+8. SUCCESS METRICS
+---------------------------------------------------------
+- Accuracy: >90% note accuracy for Western classical.
+- Accuracy: >85% note/slide accuracy for Indian Classical.
+- Processing Speed: 4-minute song processed in < 2 minutes.
+---------------------------------------------------------

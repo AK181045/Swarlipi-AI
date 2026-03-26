@@ -1,0 +1,97 @@
+SYSTEM DESIGN DOCUMENT (DESIGN.TXT)
+
+Project: SwarLipi AI
+Platform: Google Antigravity / Vertex AI
+Architecture Style: Microservices / Agentic Pipeline
+---------------------------------------------------------
+
+1. HIGH-LEVEL ARCHITECTURE
+---------------------------------------------------------
+The system follows a "Stream-to-Score" pipeline using a decoupled 
+architecture to handle high-latency AI processing without blocking 
+the user interface.
+
+[User Interface] <--> [API Gateway] <--> [Task Orchestrator]
+                                              |
+      -----------------------------------------
+      |               |               |
+[Ingestion]     [Separation]    [Transcription]  [Notation Gen]
+(YouTube/Upl)   (Demucs V5)     (MT3 / Custom)   (Verovio/LilyPond)
+
+---------------------------------------------------------
+2. COMPONENT BREAKDOWN
+---------------------------------------------------------
+
+C1: Ingestion Engine (The "Collector")
+- Service: Python / yt-dlp wrapper.
+- Function: Accepts URL/File, validates format, extracts 44.1kHz 
+  mono/stereo wav, and stores in Google Cloud Storage (GCS) "Raw" bucket.
+
+C2: Source Separation Module (The "De-Mixer")
+- Engine: Meta Demucs v5 (Transformer-based).
+- Hardware: NVIDIA L4/H100 GPUs via Vertex AI.
+- Logic: Separates Raw WAV into 6 tracks: Vocals, Drums, Bass, 
+  Piano, Guitar, and "Other" (for Traditional Instruments).
+
+C3: Indian Classical Specialist (The "Shruti-Tracker")
+- Feature: Specialized Pitch-Contour Tracking.
+- Logic: Uses CREPE (Convolutional Representation for Pitch 
+  Estimation) to track microtonal slides (Meend) specifically 
+  in the "Vocals" and "Other" stems.
+
+C4: Multi-Track Transcriber (The "Composer")
+- Model: Google MT3 (Multi-Task Multitrack Music Transcription).
+- Logic: Converts Stems into MIDI events.
+- Output: Standard MIDI + Metadata (Tempo, Time Signature, Key).
+
+C5: Notation Mapping Engine (The "Translator")
+- Logic:
+    - Path A (Western): MIDI -> MusicXML -> VexFlow/Verovio.
+    - Path B (Indian): MIDI -> Frequency Mapping -> Sargam (Sa Re Ga).
+- Database: Raga Dictionary (storing 200+ Ragas for scale mapping).
+
+---------------------------------------------------------
+3. DATA SCHEMA & FLOW
+---------------------------------------------------------
+
+[Entities]
+- User: {id, subscription_tier, history[]}
+- Project: {id, user_id, source_url, status, created_at}
+- Stem: {id, project_id, instrument_type, s3_path, midi_path}
+
+[Flow]
+1. UI sends POST /process {url: "youtube.com/..."}
+2. Orchestrator creates 'Project' in DB (Status: PENDING).
+3. Ingestion Agent fetches audio -> Update (Status: INGESTED).
+4. Separation Agent runs -> Saves 6 WAVs to GCS -> Update (Status: SEPARATED).
+5. Transcription Agent runs -> Generates MIDI/XML -> Update (Status: COMPLETED).
+6. UI Polling/Webhook triggers "Render Score" for User.
+
+---------------------------------------------------------
+4. GOOGLE ANTIGRAVITY AGENT DIRECTIVES
+---------------------------------------------------------
+To build this, the Antigravity Manager should deploy these specific agents:
+
+- [Agent: DevOps] - Set up GCS Buckets and Vertex AI Endpoints.
+- [Agent: AI-Engineer] - Containerize the Demucs v5 and MT3 models.
+- [Agent: Frontend] - Build the "Studio View" (Multi-track sheet music viewer).
+- [Agent: Musicologist] - Program the logic for converting MIDI pitch 
+  values into Indian Sargam based on the selected 'Thaat' or 'Melakarta'.
+
+---------------------------------------------------------
+5. INTERFACE DESIGN (UX/UI)
+---------------------------------------------------------
+- Theme: "Cosmic Dark" (A nod to Antigravity).
+- Score View: Scrolling horizontal "filmstrip" of sheet music.
+- Toggle Switch: Instant switch between [Western Staff] and [Sargam Text].
+- Instrument Mixer: Solo/Mute buttons for each transcribed track 
+  so users can hear only the instrument they are practicing.
+
+---------------------------------------------------------
+6. API ENDPOINTS (DRAFT)
+---------------------------------------------------------
+- GET  /api/v1/raga-lookup : Returns scale for a specific Raga.
+- POST /api/v1/transcribe  : Main entry point for URLs/Uploads.
+- GET  /api/v1/score/{id}  : Returns MusicXML or JSON for the UI.
+- PATCH /api/v1/score/{id} : Saves manual user corrections to the notes.
+---------------------------------------------------------

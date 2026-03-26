@@ -1,0 +1,78 @@
+TECH STACK SPECIFICATIONS (TECH_STACK.TXT)
+
+Project: SwarLipi AI
+Ecosystem: Google Cloud / Antigravity Agentic IDE
+Last Updated: March 2026
+---------------------------------------------------------
+
+1. FRONTEND LAYER (The Studio Interface)
+---------------------------------------------------------
+- Framework: Next.js 15+ (App Router)
+- Language: TypeScript (Strict Mode)
+- Styling: Tailwind CSS 4.0 (for fluid, responsive design)
+- State Management: TanStack Query (React Query) for async data fetching.
+- Audio Visualization: 
+    - Wavesurfer.js (For waveform display)
+    - Tone.js (For MIDI playback and synthesizer sounds)
+- Notation Rendering:
+    - Verovio (High-performance music notation engraving)
+    - VexFlow (For interactive SVG-based sheet music)
+
+---------------------------------------------------------
+2. BACKEND LAYER (The Orchestration Engine)
+---------------------------------------------------------
+- Primary Language: Python 3.12+ (Optimized for AI/ML libraries)
+- API Framework: FastAPI (Asynchronous, high-performance)
+- Task Queue: Celery + Redis (To handle long-running transcription tasks)
+- Authentication: Clerk or NextAuth.js (supporting Google/GitHub SSO)
+
+---------------------------------------------------------
+3. AI & MACHINE LEARNING (The Core Intelligence)
+---------------------------------------------------------
+- Source Separation: 
+    - Meta Demucs v5 (Hybrid Transformer Model)
+    - Spleeter-Pro (for fast, baseline separations)
+- Transcription (Audio-to-MIDI):
+    - Google MT3 (Multi-Task Multitrack Music Transcription)
+    - Basic Pitch (Spotify’s high-fidelity pitch tracker)
+- Indian Classical Logic:
+    - Essentia.js / Essentia Python (For Carnatic/Hindustani raga analysis)
+    - CREPE (Kernel-based Pitch Estimation for Meend/Gamakas)
+- LLM Integration: 
+    - Gemini 2.0 Flash (via Google Antigravity) for metadata tagging, 
+      lyric alignment, and Raga identification.
+
+---------------------------------------------------------
+4. DATA & STORAGE (The Memory)
+---------------------------------------------------------
+- Primary Database: PostgreSQL (Managed via Google Cloud SQL)
+- Vector Database: Pinecone or pgvector (To index Raga patterns and motifs)
+- Object Storage: Google Cloud Storage (GCS)
+    - Bucket 1: /raw-uploads
+    - Bucket 2: /separated-stems
+    - Bucket 3: /generated-scores (PDF/XML/MIDI)
+- Caching: Redis (for session data and processing status)
+
+---------------------------------------------------------
+5. INGESTION & PIPELINE (The Connectors)
+---------------------------------------------------------
+- URL Processing: yt-dlp (Customized for high-speed audio stream extraction)
+- Audio Conversion: FFmpeg (For sample rate normalization to 44.1kHz)
+- Infrastructure: Google Kubernetes Engine (GKE) for scaling AI workers.
+
+---------------------------------------------------------
+6. EXPORT & INTEROP (The Deliverables)
+---------------------------------------------------------
+- MusicXML: Universal exchange format for Finale/Sibelius.
+- MIDI: For Digital Audio Workstations (DAW) like Ableton/Logic Pro.
+- LilyPond: For high-quality "engraved" PDF sheet music.
+- JSON: Custom schema for Sargam (Sa-Re-Ga-Ma) text output.
+
+---------------------------------------------------------
+7. ANTIGRAVITY AGENT CONFIGURATION
+---------------------------------------------------------
+- Agent A (Architect): Manages Docker Compose and K8s manifests.
+- Agent B (Audio-Engineer): Fine-tunes the FFmpeg and Demucs parameters.
+- Agent C (Frontend-Dev): Syncs the Wavesurfer playhead with Verovio notation.
+- Agent D (Linguist): Handles the mapping of frequencies to Sargam syllables.
+---------------------------------------------------------
