@@ -96,11 +96,11 @@ class Project(Base):
     duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sample_rate: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # GCS paths
+    # GCS paths/URLs
     raw_audio_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    score_xml_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    score_midi_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    score_pdf_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    score_xml_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    score_midi_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    score_pdf_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Music metadata (populated by AI)
     detected_tempo: Mapped[int | None] = mapped_column(Integer, nullable=True)

@@ -161,12 +161,13 @@ async def _finalize_separation_in_db(project_id: str, uploaded_stems: list):
             project.status = ProjectStatus.SEPARATED
             
             # Create stem records
+            from app.models.stem import StemStatus
             for name, path in uploaded_stems:
                 stem = Stem(
                     id=uuid.uuid4(),
                     project_id=project.id,
                     instrument_type=name,
-                    status="completed",
+                    status=StemStatus.COMPLETED,
                     display_name=name.capitalize(),
                     audio_url=path,
                 )

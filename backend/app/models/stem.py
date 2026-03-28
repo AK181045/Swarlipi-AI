@@ -66,11 +66,11 @@ class Stem(Base):
         default="Unknown",
     )
 
-    # GCS file paths
-    audio_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    midi_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    musicxml_path: Mapped[str | None] = mapped_column(Text, nullable=True)
-    waveform_data_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # GCS file URLs
+    audio_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    midi_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    musicxml_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    waveform_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Sargam-specific (Phase 3)
     sargam_json_path: Mapped[str | None] = mapped_column(Text, nullable=True)

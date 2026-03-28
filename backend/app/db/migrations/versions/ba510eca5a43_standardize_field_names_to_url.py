@@ -1,8 +1,8 @@
-"""Initial migration
+"""Standardize field names to URL
 
-Revision ID: 1b176d43ce09
+Revision ID: ba510eca5a43
 Revises: 
-Create Date: 2026-03-26 14:37:45.850449
+Create Date: 2026-03-28 17:24:20.829149
 """
 from typing import Sequence, Union
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1b176d43ce09'
+revision: str = 'ba510eca5a43'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -46,9 +46,9 @@ def upgrade() -> None:
     sa.Column('duration_seconds', sa.Integer(), nullable=True),
     sa.Column('sample_rate', sa.Integer(), nullable=True),
     sa.Column('raw_audio_path', sa.Text(), nullable=True),
-    sa.Column('score_xml_path', sa.Text(), nullable=True),
-    sa.Column('score_midi_path', sa.Text(), nullable=True),
-    sa.Column('score_pdf_path', sa.Text(), nullable=True),
+    sa.Column('score_xml_url', sa.Text(), nullable=True),
+    sa.Column('score_midi_url', sa.Text(), nullable=True),
+    sa.Column('score_pdf_url', sa.Text(), nullable=True),
     sa.Column('detected_tempo', sa.Integer(), nullable=True),
     sa.Column('detected_key', sa.String(length=50), nullable=True),
     sa.Column('detected_time_signature', sa.String(length=20), nullable=True),
@@ -68,10 +68,10 @@ def upgrade() -> None:
     sa.Column('instrument_type', sa.Enum('VOCALS', 'DRUMS', 'BASS', 'PIANO', 'GUITAR', 'OTHER', name='instrumenttype'), nullable=False),
     sa.Column('status', sa.Enum('PENDING', 'SEPARATING', 'SEPARATED', 'TRANSCRIBING', 'TRANSCRIBED', 'COMPLETED', 'FAILED', name='stemstatus'), nullable=False),
     sa.Column('display_name', sa.String(length=100), nullable=False),
-    sa.Column('audio_path', sa.Text(), nullable=True),
-    sa.Column('midi_path', sa.Text(), nullable=True),
-    sa.Column('musicxml_path', sa.Text(), nullable=True),
-    sa.Column('waveform_data_path', sa.Text(), nullable=True),
+    sa.Column('audio_url', sa.Text(), nullable=True),
+    sa.Column('midi_url', sa.Text(), nullable=True),
+    sa.Column('musicxml_url', sa.Text(), nullable=True),
+    sa.Column('waveform_url', sa.Text(), nullable=True),
     sa.Column('sargam_json_path', sa.Text(), nullable=True),
     sa.Column('tabla_bol_path', sa.Text(), nullable=True),
     sa.Column('error_message', sa.Text(), nullable=True),

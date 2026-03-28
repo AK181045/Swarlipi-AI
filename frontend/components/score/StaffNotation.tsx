@@ -30,8 +30,7 @@ export function StaffNotation({
     async function loadVerovio() {
       try {
         const verovio = await import("verovio");
-        const VerovioModule = await verovio.default;
-        const toolkit = new VerovioModule();
+        const toolkit = new verovio.toolkit();
 
         // Configure Verovio rendering options
         toolkit.setOptions({

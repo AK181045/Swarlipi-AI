@@ -32,11 +32,15 @@ const nextConfig: NextConfig = {
       asyncWebAssembly: true,
     };
 
-    // Handle WASM files
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: "asset/resource",
-    });
+    // Prevent 'fs' module not found errors for client-side WASM (Verovio)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
+    }
 
     return config;
   },

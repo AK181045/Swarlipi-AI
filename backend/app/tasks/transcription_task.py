@@ -142,8 +142,8 @@ async def _finalize_project_in_db(project_id: str, results: dict, metadata: dict
             project.detected_tempo = metadata.get("tempo")
             project.detected_key = metadata.get("key")
             project.detected_time_signature = metadata.get("time_signature")
-            project.score_xml_url = results.get("musicxml")
-            project.score_midi_url = results.get("midi")
+            project.score_xml_path = results.get("musicxml")
+            project.score_midi_path = results.get("midi")
             project.completed_at = datetime.now(timezone.utc)
             await session.commit()
 
