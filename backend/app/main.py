@@ -7,7 +7,8 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -60,13 +61,32 @@ def create_app() -> FastAPI:
     )
 
     # ── CORS Middleware ──
+    # For dev, we ensure broad localhost support
+    dev_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ]
+    origins = list(set(settings.cors_origins + dev_origins))
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # ── Global Error Logging ──
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        logger.error(f"GLOBAL ERROR: {exc}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error during computation."}
+        )
 
     # ── API Routes ──
     from app.api.v1.routes.auth import router as auth_router
@@ -113,6 +133,7 @@ def create_app() -> FastAPI:
 
     # ── Static Files (for local dev file serving) ──
     uploads_dir = Path(settings.upload_dir)
+    uploads_dir.mkdir(parents=True, exist_ok=True)  # Create BEFORE checking exists()
     if uploads_dir.exists():
         app.mount("/files", StaticFiles(directory=str(uploads_dir)), name="files")
 

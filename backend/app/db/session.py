@@ -13,12 +13,22 @@ from app.core.config import get_settings
 settings = get_settings()
 
 # --- Async Engine ---
+# SQLite handles pooling differently; we disable pool_size/max_overflow if using SQLite.
+is_sqlite = settings.database_url.startswith("sqlite")
+engine_kwargs = {
+    "echo": settings.debug,
+}
+
+if not is_sqlite:
+    engine_kwargs.update({
+        "pool_size": 20,
+        "max_overflow": 10,
+        "pool_pre_ping": True,
+    })
+
 engine = create_async_engine(
     settings.database_url,
-    echo=settings.debug,
-    pool_size=20,
-    max_overflow=10,
-    pool_pre_ping=True,
+    **engine_kwargs
 )
 
 # --- Session Factory ---
@@ -41,7 +51,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_factory() as session:
         try:
             yield session
-            await session.commit()
         except Exception:
             await session.rollback()
             raise

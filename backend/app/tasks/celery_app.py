@@ -48,4 +48,7 @@ celery_app.conf.update(
 
     # Default queue
     task_default_queue="default",
+
+    # For dev, enable eager mode so we don't need a Redis server
+    task_always_eager=settings.debug,
 )

@@ -7,8 +7,10 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import Settings, get_settings
 from app.core.security import get_current_user_id
@@ -30,6 +32,7 @@ router = APIRouter(prefix="/transcribe", tags=["Transcription"])
     description="Upload an audio file or provide a URL to begin transcription.",
 )
 async def create_transcription(
+    background_tasks: BackgroundTasks,
     file: UploadFile | None = File(None),
     url: str | None = Form(None),
     title: str = Form("Untitled Project"),
@@ -61,6 +64,7 @@ async def create_transcription(
     # Process file upload
     source_filename = None
     file_save_path = None
+    project_id = uuid.uuid4()
 
     if file is not None:
         # Validate file extension
@@ -79,7 +83,6 @@ async def create_transcription(
             )
 
         # Save uploaded file temporarily
-        project_id = uuid.uuid4()
         upload_dir = settings.upload_path / str(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,8 +94,6 @@ async def create_transcription(
         file_save_path.write_bytes(content)
 
         logger.info(f"File saved: {file_save_path} ({len(content)} bytes)")
-    else:
-        project_id = uuid.uuid4()
 
     # Map source_type string to enum
     source_type_enum = SourceType(source_type)
@@ -106,27 +107,33 @@ async def create_transcription(
         source_type=source_type_enum,
         source_url=url,
         source_filename=source_filename,
-        status=ProjectStatus.PENDING,
+        status=ProjectStatus.INGESTING,
         notation_type=notation_type_enum,
     )
     db.add(project)
-    await db.flush()
+    await db.commit()
 
-    # Launch ingestion task
-    from app.tasks.ingestion_task import ingest_audio
+    logger.info(f"Project {project_id} created in database")
+
+    # Launch ingestion in background
+    from app.tasks.ingestion_task import ingest_audio_sync
 
     source_value = str(file_save_path) if file_save_path else url
-    task = ingest_audio.delay(
+    background_tasks.add_task(
+        ingest_audio_sync,
         project_id=str(project_id),
         source_type=source_type,
         source_value=source_value,
     )
 
-    # Update project with Celery task ID
-    project.celery_task_id = task.id
-    project.status = ProjectStatus.INGESTING
-    await db.flush()
+    logger.info(f"Project {project_id} — background ingestion scheduled")
 
-    logger.info(f"Project {project_id} created, ingestion task: {task.id}")
+    # Re-fetch the project with all relationships loaded for safe serialization
+    result = await db.execute(
+        select(Project)
+        .where(Project.id == project_id)
+        .options(selectinload(Project.stems))
+    )
+    project_final = result.scalar_one()
 
-    return project
+    return ProjectResponse.model_validate(project_final)

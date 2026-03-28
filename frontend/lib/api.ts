@@ -118,29 +118,53 @@ export interface RagaDetail {
 }
 
 // ── Auth Token Management ──
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-let authToken: string | null = null;
+interface AuthState {
+  token: string | null;
+  setToken: (token: string | null) => void;
+  isAuthenticated: boolean;
+}
 
-export function setAuthToken(token: string) {
-  authToken = token;
-  if (typeof window !== "undefined") {
-    localStorage.setItem("swarlipi_token", token);
+// Helper to set cookie for middleware
+function setAuthCookie(token: string | null) {
+  if (typeof document === "undefined") return;
+  if (token) {
+    // Set for 24h
+    document.cookie = `swarlipi_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+  } else {
+    document.cookie = "swarlipi_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+  }
+}
+
+export const useAuthStore = create<AuthState>()((set) => ({
+  token: null,
+  isAuthenticated: false,
+  setToken: (token) => {
+    if (typeof window !== "undefined") {
+      if (token) {
+        localStorage.setItem("swarlipi_token", token);
+      } else {
+        localStorage.removeItem("swarlipi_token");
+      }
+      setAuthCookie(token);
+    }
+    set({ token, isAuthenticated: !!token });
+  },
+}));
+
+// Safe initialization after mount (to avoid Hydration Mismatch)
+if (typeof window !== "undefined") {
+  const token = localStorage.getItem("swarlipi_token");
+  if (token) {
+    useAuthStore.getState().setToken(token);
   }
 }
 
 export function getAuthToken(): string | null {
-  if (authToken) return authToken;
-  if (typeof window !== "undefined") {
-    authToken = localStorage.getItem("swarlipi_token");
-  }
-  return authToken;
-}
-
-export function clearAuthToken() {
-  authToken = null;
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("swarlipi_token");
-  }
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("swarlipi_token");
 }
 
 // ── HTTP Client ──
@@ -150,19 +174,17 @@ async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = getAuthToken();
-  const headers: HeadersInit = {
-    ...options.headers,
-  };
-
+  const headers = new Headers(options.headers || {});
+ 
   if (token) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
-
+ 
   // Don't set Content-Type for FormData
   if (!(options.body instanceof FormData)) {
-    (headers as Record<string, string>)["Content-Type"] = "application/json";
+    headers.set("Content-Type", "application/json");
   }
-
+ 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
@@ -194,7 +216,9 @@ export async function register(
     method: "POST",
     body: JSON.stringify({ email, password, display_name: displayName }),
   });
-  setAuthToken(data.access_token);
+  if (typeof window !== "undefined") {
+    useAuthStore.getState().setToken(data.access_token);
+  }
   return data;
 }
 
@@ -206,7 +230,9 @@ export async function login(
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
-  setAuthToken(data.access_token);
+  if (typeof window !== "undefined") {
+    useAuthStore.getState().setToken(data.access_token);
+  }
   return data;
 }
 
@@ -215,21 +241,10 @@ export async function login(
 export async function createTranscription(
   formData: FormData
 ): Promise<Project> {
-  const token = getAuthToken();
-  const response = await fetch(`${API_BASE}/api/v1/transcribe`, {
+  return apiFetch<Project>("/api/v1/transcribe", {
     method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({
-      detail: "Upload failed",
-    }));
-    throw new Error(error.detail);
-  }
-
-  return response.json();
 }
 
 export async function listProjects(

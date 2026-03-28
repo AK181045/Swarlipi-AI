@@ -36,6 +36,7 @@ const statusConfig: Record<
 
 export default function ProjectsPage() {
   const [showUpload, setShowUpload] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -137,8 +138,17 @@ export default function ProjectsPage() {
             </h3>
             <FileUpload
               onSuccess={handleUploadSuccess}
-              onError={(err) => console.error(err)}
+              onError={(err) => setUploadError(err)}
             />
+            {uploadError && (
+              <div style={{ marginTop: "24px", padding: "16px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "12px", display: "flex", gap: "12px", alignItems: "center", color: "#ef4444" }}>
+                <AlertCircle size={20} />
+                <div style={{ flex: 1, fontSize: "0.9rem", fontWeight: 600 }}>{uploadError}</div>
+                <button onClick={() => setUploadError(null)} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 4 }}>
+                  <Plus size={18} style={{ transform: "rotate(45deg)" }} />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
 

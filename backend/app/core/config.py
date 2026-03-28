@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     demucs_model: str = "htdemucs_ft"
 
     # --- Auth ---
-    jwt_secret_key: str = "change-this-jwt-secret"
+    jwt_secret_key: str = "your-jwt-secret-change-this"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440  # 24 hours
 

@@ -59,7 +59,7 @@ async def register(
         auth_provider="local",
     )
     db.add(user)
-    await db.flush()
+    await db.commit()
 
     # Generate token
     token = create_access_token(
@@ -154,14 +154,14 @@ async def sso_callback(
             auth_provider_id=sso_data.provider_user_id,
         )
         db.add(user)
-        await db.flush()
+        await db.commit()
     else:
         # Update existing user with SSO info
         user.auth_provider = sso_data.provider
         user.auth_provider_id = sso_data.provider_user_id
         if sso_data.avatar_url:
             user.avatar_url = sso_data.avatar_url
-        await db.flush()
+        await db.commit()
 
     token = create_access_token(
         data={"sub": str(user.id), "email": user.email},

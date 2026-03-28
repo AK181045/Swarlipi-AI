@@ -187,7 +187,8 @@ async def update_project(
     if update.notation_type is not None:
         project.notation_type = update.notation_type
 
-    await db.flush()
+    await db.commit()
+    await db.refresh(project)
     return ProjectResponse.model_validate(project)
 
 
@@ -216,4 +217,4 @@ async def delete_project(
         )
 
     await db.delete(project)
-    await db.flush()
+    await db.commit()
