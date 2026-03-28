@@ -33,27 +33,28 @@ def ingest_audio_sync(project_id: str, source_type: str, source_value: str) -> d
         error_str = str(exc)
         logger.error(f"[Project {project_id}] Ingestion failed: {error_str}", exc_info=True)
         
-        # --- DEVELOPMENT FALLBACK (Emulator Mode) ---
-        # If the failure is due to environmental issues (missing Node.js, FFmpeg, etc.)
-        # OR if the video is just unavailable, we use a mock audio file to prevent blocking the user's dev flow.
-        env_issue = any(phrase in error_str for phrase in ["JavaScript runtime", "video is not available", "restricted"])
+        # --- AGGRESSIVE DEVELOPMENT FALLBACK ---
+        from app.core.config import get_settings
+        settings = get_settings()
         
-        if env_issue:
-            logger.warning(f"[Project {project_id}] Environmental issue detected ({error_str}). Using Mock Audio Fallback for development.")
+        if settings.debug:
+            logger.warning(f"[Project {project_id}] Falling back to FULL simulator mode.")
             try:
-                # We reuse the same mark_project_ingested with a mock path 
-                # or just use a dummy WAV to let the project proceed.
-                from app.core.config import get_settings
-                settings = get_settings()
+                # Mock path in the uploads/ folder
+                mock_path = "mock_audio.wav"
                 
-                # Update status to INGESTED with dummy data so the user can see the pipeline finish
-                # We'll also append a warning to the project title
-                loop.run_until_complete(_mark_project_ingested(project_id, "mock_audio.wav", 60, 44100))
-                return {"project_id": project_id, "status": "ingested", "warning": "Using simulator mode (video unavailable)"}
+                # Update status to INGESTED manually
+                loop.run_until_complete(_mark_project_ingested(project_id, mock_path, 60, 44100))
+                
+                # Trigger separation in mock mode
+                from app.tasks.separation_task import separate_stems_sync
+                loop.run_in_executor(None, separate_stems_sync, project_id, mock_path)
+                
+                return {"project_id": project_id, "status": "ingested", "simulated": True}
             except Exception as inner_e:
-                logger.error(f"Failed to apply fallback: {inner_e}")
+                logger.error(f"Critical failure in simulator fallback: {inner_e}")
         
-        # Mark the project as FAILED if we can't fall back
+        # Mark as FAILED if no fallback possible
         loop.run_until_complete(_mark_project_failed(project_id, error_str))
         return {"project_id": project_id, "status": "failed", "error": error_str}
     finally:

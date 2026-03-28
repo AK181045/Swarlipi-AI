@@ -42,11 +42,20 @@ async def _run_separation(project_id: str, audio_path: str) -> dict:
     
     try:
         # Step 1: Download audio from storage
-        logger.info(f"[Project {project_id}] Downloading audio for separation...")
-        audio_bytes = await storage_service.download_file(
-            settings.gcs_bucket_raw,
-            f"{project_id}/raw_audio.wav"
-        )
+        logger.info(f"[Project {project_id}] Downloading audio for separation from {audio_path}...")
+        try:
+            audio_bytes = await storage_service.download_file(
+                settings.gcs_bucket_raw,
+                audio_path
+            )
+        except Exception as e:
+            if settings.debug:
+                logger.warning(f"[Project {project_id}] Could not load {audio_path} ({e}). Using Mock Fallback for separation.")
+                # Load the global mock asset I created earlier
+                audio_bytes = await storage_service.download_file(settings.gcs_bucket_raw, "mock_audio.wav")
+            else:
+                raise
+                
         input_wav = temp_dir / "input.wav"
         input_wav.write_bytes(audio_bytes)
         

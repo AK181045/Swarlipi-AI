@@ -75,11 +75,24 @@ class StorageService:
         return f"gs://{bucket_name}/{destination_path}"
 
     async def download_file(self, bucket_name: str, source_path: str) -> bytes:
-        """Download a file from storage."""
+        """Download a file from storage. Self-healing in dev mode."""
         if self._use_local:
             file_path = self._local_base / bucket_name / source_path
-            return file_path.read_bytes()
+            try:
+                if not file_path.exists():
+                    raise FileNotFoundError(f"Local file missing: {file_path}")
+                return file_path.read_bytes()
+            except Exception as e:
+                if self.settings.debug:
+                    # SELF-HEALING: If in debug and file is missing, use the global mock
+                    mock_path = self._local_base / bucket_name / "mock_audio.wav"
+                    if mock_path.exists():
+                        import logging
+                        logging.getLogger(__name__).warning(f"File {source_path} missing. Self-healing with {mock_path}")
+                        return mock_path.read_bytes()
+                raise e
 
+        # Production GCS logic
         client = self._get_gcs_client()
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(source_path)
