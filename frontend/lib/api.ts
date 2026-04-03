@@ -154,8 +154,10 @@ export const useAuthStore = create<AuthState>()((set) => ({
   },
 }));
 
-// Safe initialization after mount (to avoid Hydration Mismatch)
-if (typeof window !== "undefined") {
+// Call this inside a useEffect to restore auth from localStorage after mount.
+// Do NOT call at module level — it causes hydration mismatch.
+export function initAuthFromStorage() {
+  if (typeof window === "undefined") return;
   const token = localStorage.getItem("swarlipi_token");
   if (token) {
     useAuthStore.getState().setToken(token);
