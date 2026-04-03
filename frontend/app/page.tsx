@@ -114,22 +114,33 @@ export default function HomePage() {
         <div style={{ position: "relative", width: "450px" }} className="md-flex-only">
           <input
             className="input"
-            placeholder="Query the musical model..."
+            placeholder="Search Raga Logic Engine..."
             style={{ paddingLeft: "42px", paddingRight: "50px", borderRadius: "100px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const query = (e.target as HTMLInputElement).value;
+                window.location.href = `/ragas?q=${encodeURIComponent(query)}`;
+              }
+            }}
           />
           <Search size={18} color="rgba(255,255,255,0.4)" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }} />
-          <Link href="/projects" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", padding: 8, background: "var(--color-aurora-bright)", borderRadius: "100px", display: "flex", cursor: "pointer" }}>
-            <ArrowRight size={16} color="white" />
+          <Link href="/ragas" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", padding: 8, background: "var(--color-aurora-bright)", borderRadius: "100px", display: "flex", cursor: "pointer" }}>
+            <Library size={16} color="white" />
           </Link>
         </div>
 
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <Link href="/login" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
-             Log In
+        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+          <Link href="/ragas" style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-secondary)", textDecoration: "none" }}>
+             Raga Engine
           </Link>
-          <Link href="/signup" className="btn btn-primary" style={{ borderRadius: "100px", padding: "10px 24px" }}>
-             Join Platform
-          </Link>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <Link href="/login" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
+               Log In
+            </Link>
+            <Link href="/signup" className="btn btn-primary" style={{ borderRadius: "100px", padding: "10px 24px" }}>
+               Join Platform
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -313,7 +324,7 @@ export default function HomePage() {
                   <li>Neural Audio Ingestion</li>
                   <li>Sargam Frequency Mapping</li>
                   <li>Polyphonic Decoding</li>
-                  <li>Raga Dictionary API</li>
+                  <li><Link href="/ragas" style={{ color: "inherit", textDecoration: "none" }}>Raga Dictionary Explorer</Link></li>
                </ul>
             </div>
             <div>
