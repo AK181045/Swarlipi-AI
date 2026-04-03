@@ -49,9 +49,13 @@ cd /d "%~dp0frontend"
 call npm install --silent
 
 echo.
-echo  🚀  Checking Database Health...
+echo  🚀  Updating Backend Dependencies (pip install)...
 cd /d "%~dp0backend"
-..\%~dp0\backend\.venv\Scripts\python.exe -m alembic upgrade head
+call .venv\Scripts\activate.bat && pip install -r requirements.txt --quiet
+
+echo.
+echo  🚀  Checking Database Health...
+call .venv\Scripts\activate.bat && alembic upgrade head
 
 echo.
 echo  =============================================================
