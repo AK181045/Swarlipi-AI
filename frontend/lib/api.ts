@@ -190,19 +190,48 @@ async function apiFetch<T>(
     headers,
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({
-      detail: response.statusText,
-    }));
-    throw new Error(error.detail || `API error: ${response.status}`);
+  // Handle Token Expiration (401)
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      useAuthStore.getState().setToken(null);
+      // Only redirect if we're not already on a login/signup page to avoid loops
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+        window.location.href = "/login?expired=true";
+      }
+    }
+    throw new Error("Your session has expired. Please log in again.");
   }
 
-  // Handle 204 No Content
+  const isJson = response.headers.get("content-type")?.includes("application/json");
+
+  if (!response.ok) {
+    let errorMessage = `API error: ${response.status}`;
+    if (isJson) {
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorMessage;
+      } catch (e) {
+        // Fallback for invalid JSON error body
+      }
+    }
+    throw new Error(errorMessage);
+  }
+
+  // Handle No Content (204)
   if (response.status === 204) {
     return undefined as T;
   }
 
-  return response.json();
+  // Safe JSON extraction
+  if (isJson) {
+    try {
+      return await response.json();
+    } catch (e) {
+      throw new Error("Received invalid data from the server.");
+    }
+  }
+
+  return undefined as T;
 }
 
 // ── Auth API ──
