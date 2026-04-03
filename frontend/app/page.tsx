@@ -27,6 +27,7 @@ import {
   Radio,
 } from "lucide-react";
 import Link from "next/link";
+import { SystemStatus } from "@/components/ui/SystemStatus";
 
 // --- Advanced Computation Engines (Re-themed tool categories) ---
 const toolEngines = [
@@ -129,17 +130,21 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <Link href="/ragas" style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-secondary)", textDecoration: "none" }}>
-             Raga Engine
-          </Link>
-          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <Link href="/login" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
-               Log In
+        <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+          <SystemStatus />
+          
+          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+            <Link href="/ragas" style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-secondary)", textDecoration: "none" }}>
+               Raga Engine
             </Link>
-            <Link href="/signup" className="btn btn-primary" style={{ borderRadius: "100px", padding: "10px 24px" }}>
-               Join Platform
-            </Link>
+            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+              <Link href="/login" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none" }}>
+                 Log In
+              </Link>
+              <Link href="/signup" className="btn btn-primary" style={{ borderRadius: "100px", padding: "10px 24px" }}>
+                 Join Platform
+              </Link>
+            </div>
           </div>
         </div>
       </nav>

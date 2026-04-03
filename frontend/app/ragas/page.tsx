@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { lookupRaga, type RagaDetail } from "@/lib/api";
 import { useEffect } from "react";
+import { SystemStatus } from "@/components/ui/SystemStatus";
 
 export default function RagaExplorer() {
   const searchParams = useSearchParams();
@@ -59,8 +60,11 @@ export default function RagaExplorer() {
             <h1 style={{ fontSize: "2.5rem", fontWeight: 900 }}>Raga Logic Explorer</h1>
             <p style={{ color: "var(--text-secondary)" }}>Query the computational dictionary of Indian Classical Music</p>
           </div>
-          <div style={{ padding: 12, background: "var(--gradient-aurora)", borderRadius: 16 }}>
-            <Library size={32} color="white" />
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <SystemStatus />
+            <div style={{ padding: 12, background: "var(--gradient-aurora)", borderRadius: 16 }}>
+              <Library size={32} color="white" />
+            </div>
           </div>
         </div>
 
